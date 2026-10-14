@@ -1,8 +1,24 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFF6D6">
+<meta name="description" content="Kolorowa gra do nauki tabliczki mnożenia i dzielenia dla dzieci.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Liczyś">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Liczyś i tabliczka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
+</head>
+<body>
 <style>
 /* Layout: sticker-book world. HUD (player, streak flame, gems) on top; pet card + 10×10 board on home; one big question card in play; shop shelves. Deliberately single bright theme. */
 :root{
@@ -173,6 +189,12 @@ button.cell:hover{transform:scale(1.12);z-index:2;position:relative}
 .parent p{margin:0;max-width:65ch}
 .sync{margin-top:14px;padding:10px 14px;border-radius:14px;font-weight:800;background:#E9FBF8;border:2px solid var(--ink)}
 .sync.local,.sync.err{background:#FFF1B8}
+.backup{margin-top:14px;border:3px dashed var(--ink);border-radius:18px;padding:12px 14px;background:#FFFDF5;display:grid;gap:8px}
+.backup h3{font-size:20px}
+.backup .reset{margin-top:0}
+.bk-lbl{font-weight:800;font-size:14px}
+.bk-code{width:100%;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--ink);border-radius:12px;padding:8px;color:var(--ink);background:var(--card);word-break:break-all;resize:vertical}
+#bkMsg{font-weight:800}
 .reset{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .reset .btn{font-size:16px;padding:8px 14px}
 
@@ -360,6 +382,20 @@ button.cell:hover{transform:scale(1.12);z-index:2;position:relative}
         <div><h3>Klejnoty</h3><p>1 klejnot za dobrą odpowiedź, 2 za szybką. Do tego 10 za skończoną porcję, 5 za trzy gwiazdki, 5 za pierwszą porcję dnia i premie za serie 3, 7, 14 i 30 dni. Jedna porcja to zwykle 30–45 klejnotów.</p></div>
       </div>
       <p class="sync" id="syncInfo"></p>
+      <div class="backup">
+        <h3>Kopia zapasowa</h3>
+        <p>Kod kopii zawiera cały postęp tego gracza: planszę, serię, klejnoty i postacie. Zapisz go w notatkach. Na nowym urządzeniu albo po wyczyszczeniu przeglądarki wklej go poniżej i kliknij „Wczytaj kopię”.</p>
+        <div class="reset">
+          <button class="btn teal" id="bkMake" type="button">Pokaż kod kopii</button>
+          <button class="btn ghost" id="bkCopy" type="button" hidden>Kopiuj kod</button>
+        </div>
+        <label for="bkCode" class="bk-lbl">Kod kopii</label>
+        <textarea id="bkCode" class="bk-code" rows="3" spellcheck="false" placeholder="Tu pojawi się kod albo wklej tu zapisany kod"></textarea>
+        <div class="reset">
+          <button class="btn orange" id="bkLoad" type="button">Wczytaj kopię</button>
+          <span id="bkMsg" aria-live="polite"></span>
+        </div>
+      </div>
       <div class="reset">
         <button class="btn ghost" id="resetBtn" type="button">Usuń tego gracza</button>
         <button class="btn pink" id="resetYes" type="button" hidden>Tak, usuń na zawsze</button>
@@ -636,11 +672,12 @@ function setSync(s){syncState=s;const el=$('syncInfo');if(!el)return;
   el.className='sync '+s;
   el.textContent=s==='ok'?'Zapis: na Twoim koncie Claude. Postęp, seria i klejnoty działają na każdym urządzeniu, na którym otworzysz tę stronę zalogowany.':
     s==='err'?'Zapis: chwilowo nie udało się zapisać na koncie. Postęp jest bezpieczny w tej przeglądarce i zapisze się przy następnej okazji.':
-    s==='local'?'Zapis: tylko w tej przeglądarce. Otwórz stronę zalogowany do Claude, żeby postęp zapisywał się na koncie i nie zginął.':
+    s==='local'?'Zapis: w tej przeglądarce, na tym urządzeniu. Na iPhonie i iPadzie dodaj stronę do ekranu początkowego (Udostępnij → Do ekranu początkowego) i uruchamiaj ją stamtąd, wtedy Safari nie usunie postępu. Raz na jakiś czas zrób też kopię zapasową poniżej.':
     'Zapis: sprawdzam…';
 }
 async function initDB(){
-  for(let i=0;i<40&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  for(let i=0;i<15&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
   try{DB=(window.claude&&window.claude.use)?await window.claude.use('db'):null}catch(e){DB=null}
   if(DB){
     try{const s=await DB.collection('players').get();s.docs.forEach(d=>{const p=d.data();if(p&&p.name)remote[d.id]=clone(p)})}
@@ -1175,6 +1212,29 @@ $('resetYes').onclick=async()=>{
   mode='login';show('login');renderLogin();
 };
 
+/* ---------- backup code ---------- */
+const bkMsg=(t,ok)=>{const m=$('bkMsg');m.textContent=t;m.style.color=ok?'#1E8A3A':'var(--pink)'};
+$('bkMake').onclick=()=>{
+  if(!cur)return;saveLocal();
+  const code='LICZYS1:'+btoa(unescape(encodeURIComponent(JSON.stringify(cur))));
+  $('bkCode').value=code;$('bkCopy').hidden=false;bkMsg('Kod gotowy. Skopiuj go i zapisz w notatkach.',true);
+};
+$('bkCopy').onclick=()=>{
+  const t=$('bkCode');const v=t.value;
+  const sel=()=>{t.focus();t.select();bkMsg('Zaznaczyłem kod. Skopiuj go ręcznie.',true)};
+  try{navigator.clipboard.writeText(v).then(()=>bkMsg('Skopiowano!',true),sel)}catch(e){sel()}
+};
+$('bkLoad').onclick=()=>{
+  const raw=$('bkCode').value.trim().replace(/\s+/g,'');
+  if(!raw.startsWith('LICZYS1:')){bkMsg('To nie wygląda na kod kopii Liczysia. Kod zaczyna się od LICZYS1:',false);return}
+  let p;
+  try{p=JSON.parse(decodeURIComponent(escape(atob(raw.slice(8)))))}catch(e){bkMsg('Kod jest niepełny albo uszkodzony. Skopiuj go jeszcze raz w całości.',false);return}
+  if(!p||!p.name){bkMsg('W kodzie nie ma danych gracza.',false);return}
+  p=normalize(p);p.slug=slugify(p.name);
+  dirty=true;login(p);
+  bkMsg(`Wczytano gracza ${p.name}.`,true);
+};
+
 /* ---------- start ---------- */
 setSync('pending');
 const last=LS.get('liczys2-last'),lp=last&&LS.get(LKEY(last));
@@ -1183,4 +1243,5 @@ initDB();
 })();
 </script>
 
-</body></html>
+</body>
+</html>
